@@ -1,0 +1,37 @@
+# kb-mcp - addition to /srv/stack/docker-compose.yml (joins n8n/db/caddy)
+#
+# NOTE the mount: /srv/stack/kb-serve is the SERVING COPY produced by the sync
+# job (rsync from the repo checkout MINUS kb-exclusions.txt folders). The raw
+# repo checkout is never mounted - that is the mount-level exclusion guarantee.
+
+  kb-mcp:
+    build: ./kb-mcp
+    restart: unless-stopped
+    environment:
+      - KB_ROOT=/kb
+      - CONTEXT_ROOT=/context
+      - TOKENS_FILE=/run/secrets/kb_tokens
+      - EXCLUDE_FILE=/app/kb-exclusions.txt
+    volumes:
+      - ./kb-serve/knowledge-base/sta:/kb:ro
+      - ./kb-serve/context-files/shared:/context:ro
+      - ./kb-mcp/kb-exclusions.txt:/app/kb-exclusions.txt:ro
+    secrets:
+      - kb_tokens
+
+secrets:
+  kb_tokens:
+    file: ./secrets/kb_tokens
+
+# Caddyfile additions:
+#
+# kb.k12sta.com {
+#     reverse_proxy kb-mcp:8787
+# }
+#
+# reports.k12sta.com {
+#     root * /srv/stack/reports
+#     @noauth not query token=REPLACE_WITH_SHARED_REPORT_TOKEN
+#     respond @noauth "Add ?token=... to the link" 401
+#     file_server
+# }

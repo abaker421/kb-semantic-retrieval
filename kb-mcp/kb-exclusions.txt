@@ -1,0 +1,7 @@
+# Shared Brain exclusion list - SOW Section 10, drafted 2026-06-11, pending Adam's sign-off.
+# Relative to Knowledge Base/sta/. Used twice: (1) by the sync job's rsync --exclude
+# (mount-level enforcement), (2) by server.py EXCLUDE_FILE (defense-in-depth).
+sta-org/salesforce-org-schema
+sta-org/leadership-transition-and-team-health
+# Flagged for Adam's call - excluded by default, include if sales assistants need pricing strategy:
+sales-marketing/b2b-public-sector-quote-and-pricing-strategy
