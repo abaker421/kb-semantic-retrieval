@@ -1,0 +1,6 @@
+# kb-mcp access keys - one per person: token,name
+# Generate each token with: python3 -c "import secrets; print('sta-kb-' + secrets.token_urlsafe(18))"
+# Revoke someone = delete their line (re-read on every request; no restart needed).
+# This file lives at /srv/stack/secrets/kb_tokens on the server. chmod 600. NEVER in git.
+sta-kb-REPLACE_ME_ADAM,adam
+sta-kb-REPLACE_ME_TYLER,tyler
