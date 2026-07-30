@@ -1,0 +1,9 @@
+# Secrets - NEVER track live keys. Only kb_tokens.example is tracked.
+kb_tokens
+**/kb_tokens
+*.env
+secrets/
+# Generated / runtime
+__pycache__/
+*.pyc
+index_data/
