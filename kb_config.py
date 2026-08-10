@@ -13,8 +13,12 @@ ROOTS = [
     ("kb",           os.path.join(CLAUDE, "Knowledge Base")),
     ("blueprint",    os.path.join(CLAUDE, "Project Blueprints")),
     ("skill",        os.path.join(CLAUDE, "Backups", "skills")),
-    ("brain-personal", os.path.join(CLAUDE, "Brain")),
-    ("brain-sta",    os.path.join(CLAUDE, "Projects", "STA Projects", "The Architect", "STA-Brain")),
+    # Brains relocated in the 2026-06-25 restructure. The old "Brain" and
+    # "The Architect/STA-Brain" folders no longer exist; do NOT point brain-sta at
+    # "The Architect/Adam-Work-Brain" - that is a 2-file README-STALE-COPY stub.
+    ("brain-personal", os.path.join(CLAUDE, "Adam-Personal-Brain")),
+    ("brain-sta",    os.path.join(CLAUDE, "Projects", "STA Projects", "Work Assistant", "Adam-Work-Brain")),
+    ("brain-creative", os.path.join(CLAUDE, "Creative Brains")),
 ]
 
 # Only Markdown for v1. HTML reports / binaries are noise for retrieval.
@@ -28,6 +32,8 @@ EXCLUDE_DIRS = (
     os.sep + "dist-extension" + os.sep,
     os.sep + "_Archived" + os.sep,
     os.sep + "__pycache__" + os.sep,
+    os.sep + ".obsidian" + os.sep,   # Obsidian vault config/workspace - not corpus content
+    os.sep + ".trash" + os.sep,      # Obsidian soft-deleted notes (Adam-Work-Brain) - must not re-enter corpus
 )
 # Generated one-liner surfaces - skip so they don't dilute real content.
 EXCLUDE_BASENAMES = ("_index.md", "index-lookup.md", "index.md")
