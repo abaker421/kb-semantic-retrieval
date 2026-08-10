@@ -28,7 +28,16 @@ python3 kb_search.py --k 8 "TT10 clock frozen error"
   installed. This is deliberate - naive RRF hybrid was polluted by BM25 junk in the WS0
   spike.
 - Corpus roots are in `kb_config.py` (`ROOTS`): Knowledge Base, Project Blueprints,
-  Backups/skills, and both brains.
+  Backups/skills, and the three brains (personal, work, creative).
+
+## Nightly maintenance (you usually do NOT need to run kb_index.py by hand)
+As of 2026-08-10 the index is refreshed automatically every night at 03:00 local by the
+Windows scheduled task **`KB Semantic Index Nightly`** (see `scripts/README.md`). It runs
+`scripts\kb-index-nightly.ps1`, which pre-flights the corpus roots, runs `kb_index.py`, and
+writes a log + `status.json` to `C:\Users\Adam\Documents\Claude\reports\system-health\kb-index\`.
+So after a deep-research commission you no longer have to run `kb_index.py` yourself - the new
+modules are picked up on the next nightly run (or run it by hand if you need them retrievable
+immediately). Manage the task with `scripts\register-kb-index-task.ps1`.
 
 ## Where it must run
 **Not in the Cowork cloud sandbox** - HuggingFace is blocked by its proxy, so the embedding
