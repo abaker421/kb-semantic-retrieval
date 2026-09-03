@@ -12,11 +12,19 @@ def file_hash(text):
 
 
 def iter_files():
-    """Yield (label, abspath) for every included Markdown file across all roots."""
+    """Yield (label, abspath) for every included Markdown file across all roots.
+
+    Directories whose basename starts with any C.EXCLUDE_DIR_PREFIXES entry are pruned
+    along with their whole subtree, so quarantined/superseded content cannot be cited.
+    This is deliberately a DIRECTORY-only test: underscore-prefixed FILES are still
+    indexed (see the note on EXCLUDE_DIR_PREFIXES in kb_config.py).
+    """
     for label, root in C.ROOTS:
         if not os.path.isdir(root):
             continue
-        for dirpath, _dirs, files in os.walk(root):
+        for dirpath, dirs, files in os.walk(root):
+            # prune in place so os.walk never descends into the excluded subtree
+            dirs[:] = [d for d in dirs if not d.startswith(C.EXCLUDE_DIR_PREFIXES)]
             for name in files:
                 if not name.endswith(C.INCLUDE_EXT):
                     continue

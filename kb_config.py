@@ -35,6 +35,14 @@ EXCLUDE_DIRS = (
     os.sep + ".obsidian" + os.sep,   # Obsidian vault config/workspace - not corpus content
     os.sep + ".trash" + os.sep,      # Obsidian soft-deleted notes (Adam-Work-Brain) - must not re-enter corpus
 )
+# DIRECTORY name prefixes that prune the directory and its entire subtree.
+# "_" covers _to_delete, _staged, _retired, _raw, _Skills, _pre-sync-*, _pre-synthesis-*:
+# quarantined, superseded and pre-install content that must never be citable.
+# NOTE: this is a DIRECTORY rule only. Underscore-prefixed FILES stay indexed on purpose -
+# _known-issues.md, _summary.md, _syllabus.md and _article-index.md are real content, and
+# the KB standard has _known-issues.md OUTRANK research modules on behavior it covers.
+EXCLUDE_DIR_PREFIXES = ("_",)
+
 # Generated one-liner surfaces - skip so they don't dilute real content.
 EXCLUDE_BASENAMES = ("_index.md", "index-lookup.md", "index.md")
 
