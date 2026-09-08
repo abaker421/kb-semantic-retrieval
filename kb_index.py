@@ -37,12 +37,23 @@ def main():
 
     manifest = load_manifest()
     current = {}   # path -> (label, text, hash)
-    for label, path in iter_files():
+    pruned_dirs = {}
+    for label, path in iter_files(pruned_dirs):
         try:
             text = open(path, encoding="utf-8", errors="replace").read()
         except Exception:
             continue
         current[path] = (label, text, file_hash(text))
+
+    # Underscore dirs are excluded by default and C.INCLUDE_DIR_NAMES is the only way back
+    # in - so that allow-list can go stale and silently drop a new LIVE folder. Log what we
+    # pruned every run: an unfamiliar name here means "go add it to INCLUDE_DIR_NAMES".
+    if pruned_dirs:
+        summary = ", ".join(f"{d} ({n} .md)" for d, n in sorted(pruned_dirs.items()))
+        print(f"pruned dirs: {len(pruned_dirs)} names | {sum(pruned_dirs.values())} .md skipped "
+              f"| allow-listed: {', '.join(C.INCLUDE_DIR_NAMES)} | {summary}", flush=True)
+    else:
+        print(f"pruned dirs: none | allow-listed: {', '.join(C.INCLUDE_DIR_NAMES)}", flush=True)
 
     changed = [p for p, (_, _, h) in current.items() if manifest.get(p) != h]
     deleted = [p for p in manifest if p not in current]
