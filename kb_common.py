@@ -11,20 +11,41 @@ def file_hash(text):
     return hashlib.sha1(text.encode("utf-8", "replace")).hexdigest()
 
 
-def iter_files():
+def _count_md(root):
+    """.md files in a subtree we are about to prune (for the pruned-dir log)."""
+    n = 0
+    for _, _, files in os.walk(root):
+        n += sum(1 for f in files if f.endswith(C.INCLUDE_EXT))
+    return n
+
+
+def iter_files(pruned_dirs=None):
     """Yield (label, abspath) for every included Markdown file across all roots.
 
     Directories whose basename starts with any C.EXCLUDE_DIR_PREFIXES entry are pruned
-    along with their whole subtree, so quarantined/superseded content cannot be cited.
-    This is deliberately a DIRECTORY-only test: underscore-prefixed FILES are still
-    indexed (see the note on EXCLUDE_DIR_PREFIXES in kb_config.py).
+    along with their whole subtree, so quarantined/superseded content cannot be cited -
+    UNLESS the basename is in C.INCLUDE_DIR_NAMES, the explicit allow-list of live
+    underscore folders. This is deliberately a DIRECTORY-only test: underscore-prefixed
+    FILES are still indexed (see the note on EXCLUDE_DIR_PREFIXES in kb_config.py).
+
+    pruned_dirs: optional dict, populated as {directory basename: .md files skipped}.
+    The allow-list is a single place that can go stale, so callers pass this in and log
+    it - a newly created live underscore folder then shows up in the run output instead
+    of vanishing silently.
     """
     for label, root in C.ROOTS:
         if not os.path.isdir(root):
             continue
         for dirpath, dirs, files in os.walk(root):
             # prune in place so os.walk never descends into the excluded subtree
-            dirs[:] = [d for d in dirs if not d.startswith(C.EXCLUDE_DIR_PREFIXES)]
+            keep = []
+            for d in dirs:
+                if d.startswith(C.EXCLUDE_DIR_PREFIXES) and d not in C.INCLUDE_DIR_NAMES:
+                    if pruned_dirs is not None:
+                        pruned_dirs[d] = pruned_dirs.get(d, 0) + _count_md(os.path.join(dirpath, d))
+                    continue
+                keep.append(d)
+            dirs[:] = keep
             for name in files:
                 if not name.endswith(C.INCLUDE_EXT):
                     continue
