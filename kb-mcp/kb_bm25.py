@@ -42,7 +42,24 @@ K1 = 1.5
 B = 0.75
 MAX_CHUNK_LINES = 150
 MAX_FILE_BYTES = 2 * 1024 * 1024
-SKIP_DIRS = {"_prompts", "node_modules"}
+# Non-corpus directories, matched by exact name.
+SKIP_DIRS = {"node_modules"}
+# DIRECTORY name prefixes that prune the directory and its entire subtree. Mirrors
+# EXCLUDE_DIR_PREFIXES in kb_config.py at this repo's root - duplicated, not imported,
+# because kb-mcp/ is the Docker deploy unit and kb_config.py is not copied into the
+# image. Keep the two in sync, or a file is citable in one retrieval layer and
+# invisible in the other.
+# "_" covers _to_delete, _retired, _raw, _duplicates, _staged: quarantined and
+# superseded content that must never be citable.
+# NOTE: DIRECTORY rule only. Underscore-prefixed FILES stay indexed on purpose -
+# _known-issues.md, _summary.md, _syllabus.md and _article-index.md are real content,
+# and the KB standard has _known-issues.md OUTRANK research modules on behavior it covers.
+EXCLUDE_DIR_PREFIXES = ("_",)
+# The exception list: underscore directories that ARE live reference and survive the
+# prefix rule. Same six names as kb_config.py INCLUDE_DIR_NAMES - keep them in sync.
+# A new underscore folder is EXCLUDED until someone adds it here.
+INCLUDE_DIR_NAMES = {"_Apps", "_Claude-Projects", "_Research-Commissions",
+                     "_System", "_Templates", "_prompts"}
 # KB nav / generated files that are noise in search results (mirrors reference).
 SKIP_ROOT_FILES = {"index.md", "index-lookup.md", "deep-research-prompts.md"}
 SKIP_ANY_FILES = {"kb-search-index.json"}
@@ -125,7 +142,9 @@ class KbIndex:
     def _iter_md_files(self):
         """Yield (abs_path, rel_path) for every indexable .md file."""
         for dirpath, dirnames, filenames in os.walk(self.kb_root):
-            dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+            dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS
+                           and (not d.startswith(EXCLUDE_DIR_PREFIXES)
+                                or d in INCLUDE_DIR_NAMES)]
             for fn in filenames:
                 if not fn.endswith(".md"):
                     continue
